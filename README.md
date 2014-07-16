@@ -1,12 +1,10 @@
-Flex Micro Rest Framework
-====
+## Flex Micro Rest Framework
 
 flex for your legacy servlet project.
 
 
-easy install
-=======
-
+#### Easy Install
+```xml
     <web-app>
       <filter>
         <filter-name>FlexFilter</filter-name>
@@ -29,12 +27,12 @@ easy install
         <url-pattern>/api/*</url-pattern>
       </filter-mapping>
     </web-app>
+```
 
 
+#### Resource Example
 
-example resource class
-===
-    
+```java    
     package com.hasanozgan.flex.examples;
     
     import com.hasanozgan.flex.core.annotations.Authenticated;
@@ -73,3 +71,4 @@ example resource class
             return Result.ok();
         }
     }
+```
