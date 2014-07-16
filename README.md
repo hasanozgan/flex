@@ -62,7 +62,7 @@ flex for your legacy servlet project.
     
         @Authenticated
         @Resource(path = "/user/coupons/{gameType}", method = HttpMethod.GET)
-        public static ResultWith<String> postUserInfo(RequestContext ctx) {
+        public static ResultWith<String> getUserCoupons(RequestContext ctx) {
             return Result.ok(ctx.getParameter("gameType"));
         }
     
