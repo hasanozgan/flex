@@ -25,6 +25,12 @@ public class UserResource {
         return Result.ok(ctx.getEntity());
     }
 
+    @Authenticated
+    @Resource(path = "/user/coupons/{gameType}", method = HttpMethod.GET)
+    public static ResultWith<String> postUserInfo(RequestContext ctx) {
+        return Result.ok(ctx.getParameter("gameType"));
+    }
+
     @Resource(path = "/user/details", method = HttpMethod.GET)
     public static Result getUserDetails(RequestContext ctx) {
         return Result.ok();
