@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class FlexFilter implements Filter {
     private String apiRoot;
-    private String resourcePackage;
+    private String resourceScan;
     private String authenticatorClass;
     private Authenticator authenticator;
     private Set<ResourceData> routes;
@@ -50,7 +50,7 @@ public class FlexFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         this.apiRoot = filterConfig.getInitParameter("api-root");
-        this.resourcePackage = filterConfig.getInitParameter("resource-package");
+        this.resourceScan = filterConfig.getInitParameter("resource-scan");
         this.authenticatorClass = filterConfig.getInitParameter("authenticator");
 
         this.routes = getResourceContext();
@@ -232,7 +232,7 @@ public class FlexFilter implements Filter {
         Set<ResourceData> resourceContext = new HashSet<ResourceData>();
 
         Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .addUrls(ClasspathHelper.forPackage(resourcePackage))
+                .addUrls(ClasspathHelper.forPackage(resourceScan))
                 .setScanners(new MethodAnnotationsScanner()));
 
         Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Resource.class);
