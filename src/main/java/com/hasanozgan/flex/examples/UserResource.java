@@ -15,12 +15,18 @@ public class UserResource {
 
     @Authenticated
     @Resource(path = "/user/info", method = HttpMethod.GET)
-    public static ResultWith<User> userInfo(RequestContextWith<User> ctx) {
+    public static ResultWith<User> getUserInfo() {
         return Result.ok(new User(1, "hasan"));
     }
 
-    @Resource(path = "/user/details", method = HttpMethod.POST)
-    public static Result userDetails(RequestContext ctx) {
+    @Authenticated
+    @Resource(path = "/user/info", method = HttpMethod.POST)
+    public static ResultWith<User> postUserInfo(RequestContextWith<User> ctx) {
+        return Result.ok(ctx.getEntity());
+    }
+
+    @Resource(path = "/user/details", method = HttpMethod.GET)
+    public static Result getUserDetails(RequestContext ctx) {
         return Result.ok();
     }
 }

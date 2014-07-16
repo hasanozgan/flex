@@ -9,7 +9,7 @@ package com.hasanozgan.flex.core.models.response;
  */
 public abstract class Result implements ResultWith<Object> {
     public static Result ok() {
-        return new Success(new Object());
+        return new Success(null);
     }
 
     public static Result error(Status status) {

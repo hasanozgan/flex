@@ -35,4 +35,24 @@ public class ResourceData {
     public boolean authenticationRequired() {
         return authenticationRequired;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ResourceData)) return false;
+
+        ResourceData that = (ResourceData) o;
+
+        if (httpMethod != that.httpMethod) return false;
+        if (path != null ? !path.equals(that.path) : that.path != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = path != null ? path.hashCode() : 0;
+        result = 31 * result + (httpMethod != null ? httpMethod.hashCode() : 0);
+        return result;
+    }
 }

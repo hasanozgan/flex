@@ -21,8 +21,6 @@
             <param-name>authenticator</param-name>
             <param-value>com.hasanozgan.flex.examples.MyAuthenticator</param-value>
         </init-param>
-
-
     </filter>
     <filter-mapping>
         <filter-name>FlexFilter</filter-name>

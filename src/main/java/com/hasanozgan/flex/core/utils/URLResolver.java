@@ -9,23 +9,23 @@ import java.util.*;
  */
 public class URLResolver {
 
-    private final TreeMap<String, ResourceData> routes;
+    private final Set<ResourceData> routes;
 
-    public URLResolver(TreeMap<String, ResourceData> routes) {
+    public URLResolver(Set<ResourceData> routes) {
         this.routes = routes;
     }
 
-    public TreeMap<String, ResourceData> getRoutes() {
+    public Set<ResourceData> getRoutes() {
         return this.routes;
     }
-
 
     public URLData getUrlDataForUrl(String url, HttpMethod httpMethod) {
         URLData urlData = null;
 
         //Get all route keys for this plugin
-        for (Map.Entry<String, ResourceData> urlPattern : getRoutes().entrySet()) {
+        for (ResourceData resourceData : getRoutes()) {
             String urlToFind = url;
+            String urlPattern = resourceData.getPath();
             boolean urlMatch = false;
             Map<String, String> propertyMap = new HashMap<String, String>();
 
@@ -33,15 +33,15 @@ public class URLResolver {
                 urlToFind = url.substring(0, url.indexOf("?"));
             }
 
-            if (urlPattern.getValue().getHttpMethod().equals(httpMethod)) {
-                if (urlPattern.getKey().equals(urlToFind)) {
+            if (resourceData.getHttpMethod().equals(httpMethod)) {
+                if (urlPattern.equals(urlToFind)) {
                     //Excact match
                     urlMatch = true;
-                } else if (urlPattern.getKey().contains("{") && urlPattern.getKey().contains("}")) {
+                } else if (urlPattern.contains("{") && urlPattern.contains("}")) {
                     urlMatch = true;
                     //If route contains dynamic parts
                     String[] urlParts = url.split("/");       //The parts of the actual URL,split by /
-                    String[] currUrlParts = urlPattern.getKey().split("/");  //The parts of the URL pattern, split by /
+                    String[] currUrlParts = urlPattern.split("/");  //The parts of the URL pattern, split by /
 
                     //A match needs the same amount of parts
                     if (urlParts.length == currUrlParts.length) {
@@ -63,7 +63,7 @@ public class URLResolver {
 
             //If Url match, build up a URL data object
             if (urlMatch) {
-                urlData = new URLData(urlPattern.getKey(), url, propertyMap, urlPattern.getValue());
+                urlData = new URLData(urlPattern, url, propertyMap, resourceData);
                 break;
             }
         }
