@@ -7,24 +7,11 @@ package com.hasanozgan.flex.core.models.response;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class Result implements ResultWith<Object> {
-    public static Result ok() {
-        return new Success(null);
-    }
+public interface Result<T> {
+    public Boolean isSuccess();
+    public Boolean isFailure();
+    public Status getStatus();
+    public T getEntity();
 
-    public static Result error(Status status) {
-        return Failure.withType(status);
-    }
 
-    public static <T> ResultWith<T> ok(T entity) {
-        return new SuccessWith<T>(entity);
-    }
-
-    public static <T> ResultWith<T> errorWith(Status status) {
-        return FailureWith.withType(status);
-    }
-
-    public static <T> ResultWith<T> error(Status status, T entity) {
-        return new FailureWith<T>(status, entity);
-    }
 }

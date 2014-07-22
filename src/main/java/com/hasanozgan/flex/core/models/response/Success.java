@@ -7,16 +7,30 @@ package com.hasanozgan.flex.core.models.response;
  * Time: 2:54 PM
  * To change this template use File | Settings | File Templates.
  */
-class Success extends Result {
-    private Object entity;
+public class Success<T> implements Result<T> {
+    private final T entity;
 
-    public Success(Object entity) {
+    public Success() {
+        this.entity = null;
+    }
+
+    public Success(T entity) {
         this.entity = entity;
     }
 
     @Override
-    public Boolean isSucceed() {
+    public T getEntity() {
+        return entity;
+    }
+
+    @Override
+    public Boolean isSuccess() {
         return true;
+    }
+
+    @Override
+    public Boolean isFailure() {
+        return false;
     }
 
     @Override
@@ -24,8 +38,7 @@ class Success extends Result {
         return SuccessStatus.SUCCESS;
     }
 
-    @Override
-    public Object getEntity() {
-        return entity;
+    public static <T> Result<T> withType() {
+        return (Result<T>) new Failure<Object>(SuccessStatus.SUCCESS, new Object());
     }
 }

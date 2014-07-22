@@ -2,14 +2,15 @@ package com.hasanozgan.flex.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hasanozgan.flex.core.annotations.Authenticated;
-import com.hasanozgan.flex.core.annotations.Resource;
-import com.hasanozgan.flex.core.models.request.RequestContext;
-import com.hasanozgan.flex.core.models.request.RequestContextWith;
-import com.hasanozgan.flex.core.models.request.RequestContextWithEntity;
+import com.hasanozgan.flex.core.annotations.Secured;
+import com.hasanozgan.flex.core.annotations.Path;
+import com.hasanozgan.flex.core.models.request.HttpContext;
+import com.hasanozgan.flex.core.models.request.HttpContextEntity;
+import com.hasanozgan.flex.core.models.request.HttpContextObject;
 import com.hasanozgan.flex.core.models.response.FailureStatus;
 import com.hasanozgan.flex.core.models.response.Result;
-import com.hasanozgan.flex.core.models.response.ResultWith;
+import com.hasanozgan.flex.core.models.response.Result;
+import com.hasanozgan.flex.core.models.response.Results;
 import com.hasanozgan.flex.core.utils.ResourceData;
 import com.hasanozgan.flex.core.utils.URLData;
 import com.hasanozgan.flex.core.utils.URLResolver;
@@ -26,9 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -44,6 +43,7 @@ public class FlexFilter implements Filter {
     private URLResolver urlResolver;
     private HttpServletRequest request;
     private HttpServletResponse response;
+    private ServletContext servletContext;
     private Gson gson;
 
 
@@ -52,7 +52,7 @@ public class FlexFilter implements Filter {
         this.apiRoot = filterConfig.getInitParameter("api-root");
         this.resourceScan = filterConfig.getInitParameter("resource-scan");
         this.authenticatorClass = filterConfig.getInitParameter("authenticator");
-
+        this.servletContext = filterConfig.getServletContext();
         this.routes = getResourceContext();
         this.urlResolver = new URLResolver(this.routes);
 
@@ -68,12 +68,12 @@ public class FlexFilter implements Filter {
 
         String pathInfo = request.getRequestURI().substring(request.getContextPath().length()).substring(apiRoot.length());
         URLData urlData = urlResolver.getUrlDataForUrl(pathInfo, HttpMethod.valueOf(request.getMethod()));
-        ResultWith result = null;
+        Result result = null;
 
         // Resource not found
         if (null == urlData) {
             if (request.getHeader("Accept").contains("application/json")) {
-                renderResult(Result.error(FailureStatus.NOT_FOUND));
+                renderResult(Results.error(FailureStatus.NOT_FOUND));
             }
             else {
                 filterChain.doFilter(servletRequest, servletResponse);
@@ -83,7 +83,7 @@ public class FlexFilter implements Filter {
 
         // action invocation...
         if (urlData.getResourceData().authenticationRequired() && !authenticator.isAuthenticated()) {
-            result = Result.error(FailureStatus.AUTHENTICATION_REQUIRED);
+            result = Results.error(FailureStatus.AUTHENTICATION_REQUIRED);
         }
         else {
             result = actionInvoker(urlData);
@@ -92,24 +92,24 @@ public class FlexFilter implements Filter {
         renderResult(result);
     }
 
-    private ResultWith actionInvoker(URLData urlData) {
+    private Result actionInvoker(URLData urlData) {
         if (urlData == null || urlData.getResourceData() == null || urlData.getResourceData().getActionMethod() == null) {
-            return Result.error(FailureStatus.INVALID_URL_DATA_CONFIGURATION);
+            return Results.error(FailureStatus.INVALID_URL_DATA_CONFIGURATION);
         }
 
-        ResultWith result = null;
+        Result result = null;
 
         result = createActionMethodParameter(urlData);
-        if (!result.isSucceed()) {
+        if (result.isFailure()) {
             return result;
         }
         Object parameter = result.getEntity();
         try {
-            result = (ResultWith) ((parameter == null)
+            result = (Result) ((parameter == null)
                     ? urlData.getResourceData().getActionMethod().invoke(null)
                     : urlData.getResourceData().getActionMethod().invoke(null, parameter));
         } catch (Exception e) {
-            Result.error(FailureStatus.INVOKER_ERROR);
+            Results.error(FailureStatus.INVOKER_ERROR);
         }
 
         return result;
@@ -123,31 +123,35 @@ public class FlexFilter implements Filter {
         }
     }
 
-    private ResultWith createActionMethodParameter(URLData urlData) {
+    private Result createActionMethodParameter(URLData urlData) {
         Type[] types = urlData.getResourceData().getActionMethod().getGenericParameterTypes();
 
-        if (types.length == 0) return Result.ok();
+        if (types.length == 0) return Results.ok();
 
-        if (RequestContext.class.equals(types[0])) {
-            return Result.ok(new RequestContext(request, response, authenticator, urlData.getParameters()));
+        if (HttpContext.class.equals(types[0])) {
+            return Results.ok(new HttpContextObject(request, response, servletContext, authenticator, urlData.getParameters()));
         }
         else if (types[0] instanceof ParameterizedTypeImpl) {
             ParameterizedTypeImpl parameterizedType = ((ParameterizedTypeImpl)types[0]);
 
             // RequestContextWith Degilse hatayı çak
-            if (!RequestContextWith.class.equals(parameterizedType.getRawType()))
-                return Result.error(FailureStatus.INVALID_ACTION_METHOD_PARAMETERS);
+            if (!HttpContext.class.equals(parameterizedType.getRawType()))
+                return Results.error(FailureStatus.INVALID_ACTION_METHOD_PARAMETERS);
 
             String jsonEntity = fetchEntityString();
             Object entity = null;
             if (!jsonEntity.isEmpty()) {
-                entity = gson.fromJson(jsonEntity, parameterizedType.getActualTypeArguments()[0]);
+                try {
+                    entity = gson.fromJson(jsonEntity, parameterizedType.getActualTypeArguments()[0]);
+                    return Results.ok(new HttpContextEntity(request, response, servletContext, authenticator, entity, urlData.getParameters()) {});
+                }
+                catch (Exception ex) {
+                }
             }
-
-            return Result.ok(new RequestContextWithEntity(request, response, authenticator, entity, urlData.getParameters()) {});
+            return Results.error(FailureStatus.INVALID_JSON_DATA);
         }
         else {
-            return Result.error(FailureStatus.INVALID_ACTION_METHOD_PARAMETERS);
+            return Results.error(FailureStatus.INVALID_ACTION_METHOD_PARAMETERS);
         }
     }
 
@@ -178,12 +182,12 @@ public class FlexFilter implements Filter {
         return sb.toString();
     }
 
-    private void renderResult(ResultWith result) throws IOException {
+    private void renderResult(Result result) throws IOException {
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(result.getStatus().getHttpStatus());
-        Object data = result.isSucceed() ? result.getEntity() : result.getStatus();
+        Object data = result.isSuccess() ? result.getEntity() : result.getStatus();
 
         response.getWriter().write(addJSONP((data != null) ? gson.toJson(data) : "{}"));
     }
@@ -207,13 +211,7 @@ public class FlexFilter implements Filter {
         try {
             Class clazz = Class.forName(authenticatorClass);
             this.authenticator = (Authenticator) clazz.newInstance();
-        } catch (NullPointerException e) {
-            this.authenticator = new DefaultAuthenticator();
-        } catch (ClassNotFoundException e) {
-            this.authenticator = new DefaultAuthenticator();
-        } catch (InstantiationException e) {
-            this.authenticator = new DefaultAuthenticator();
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             this.authenticator = new DefaultAuthenticator();
         }
 
@@ -235,14 +233,14 @@ public class FlexFilter implements Filter {
                 .addUrls(ClasspathHelper.forPackage(resourceScan))
                 .setScanners(new MethodAnnotationsScanner()));
 
-        Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Resource.class);
+        Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Path.class);
 
         for (Method method : methodSet) {
-            Authenticated authenticated = (Authenticated)method.getAnnotation(Authenticated.class);
-            Resource resource = (Resource)method.getAnnotation(Resource.class);
+            Secured authenticated = (Secured)method.getAnnotation(Secured.class);
+            Path path = (Path)method.getAnnotation(Path.class);
 
-            if (null != resource) {
-                resourceContext.add(new ResourceData(resource.path(), resource.method(), authenticated != null, method));
+            if (null != path) {
+                resourceContext.add(new ResourceData(path.path(), path.method(), authenticated != null, method));
             }
         }
 
