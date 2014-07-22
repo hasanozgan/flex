@@ -9,7 +9,6 @@ import com.hasanozgan.flex.core.models.request.HttpContextEntity;
 import com.hasanozgan.flex.core.models.request.HttpContextObject;
 import com.hasanozgan.flex.core.models.response.FailureStatus;
 import com.hasanozgan.flex.core.models.response.Result;
-import com.hasanozgan.flex.core.models.response.Result;
 import com.hasanozgan.flex.core.models.response.Results;
 import com.hasanozgan.flex.core.utils.ResourceData;
 import com.hasanozgan.flex.core.utils.URLData;
@@ -240,7 +239,7 @@ public class FlexFilter implements Filter {
             Path path = (Path)method.getAnnotation(Path.class);
 
             if (null != path) {
-                resourceContext.add(new ResourceData(path.path(), path.method(), authenticated != null, method));
+                resourceContext.add(new ResourceData(path.uri(), path.method(), authenticated != null, method));
             }
         }
 

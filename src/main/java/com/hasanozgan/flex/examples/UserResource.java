@@ -13,24 +13,24 @@ import com.hasanozgan.flex.core.models.response.Results;
 public class UserResource {
 
     @Secured
-    @Path(path = "/user/info", method = HttpMethod.GET)
+    @Path(uri = "/user/info", method = HttpMethod.GET)
     public static Result<User> getUserInfo() {
         return Results.ok(new User(1, "hasan"));
     }
 
     @Secured
-    @Path(path = "/user/info", method = HttpMethod.POST)
+    @Path(uri = "/user/info", method = HttpMethod.POST)
     public static Result<User> postUserInfo(HttpContext<User> ctx) {
         return Results.ok(ctx.getEntity());
     }
 
     @Secured
-    @Path(path = "/user/coupons/{gameType}", method = HttpMethod.GET)
+    @Path(uri = "/user/coupons/{gameType}", method = HttpMethod.GET)
     public static Result<String> getUserCoupons(HttpContext ctx) {
         return Results.ok(ctx.getPathParameter("gameType"));
     }
 
-    @Path(path = "/user/details", method = HttpMethod.GET)
+    @Path(uri = "/user/details", method = HttpMethod.GET)
     public static Result getUserDetails(HttpContext ctx) {
         return Results.ok();
     }
