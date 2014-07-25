@@ -1,5 +1,6 @@
 package com.hasanozgan.flex.core.utils;
 
+import com.hasanozgan.flex.core.FlexAction;
 import com.hasanozgan.flex.core.HttpMethod;
 import com.hasanozgan.flex.core.annotations.Path;
 import com.hasanozgan.flex.core.annotations.Secured;
@@ -8,6 +9,11 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -17,16 +23,32 @@ import java.util.*;
 public class FlexUrlResolver {
 
     private final Set<ActionData> routes;
+    private final FilterConfig filterConfig;
+    private final String apiRoot;
 
-    public FlexUrlResolver(String controllerPackageScan) {
-        this.routes = getActionContext(controllerPackageScan);
+    public FlexUrlResolver(FilterConfig filterConfig) {
+        this.filterConfig = filterConfig;
+        this.apiRoot = filterConfig.getInitParameter("api-root");
+        this.routes = getActionContext(filterConfig.getInitParameter("controller-scan"));
     }
 
     public Set<ActionData> getRoutes() {
         return this.routes;
     }
 
-    public URLData getUrlDataForUrl(String url, HttpMethod httpMethod) {
+    public FlexAction actionFactory(ServletRequest servletRequest, ServletResponse servletResponse) {
+        return actionFactory((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
+    }
+
+    public FlexAction actionFactory(HttpServletRequest request, HttpServletResponse response) {
+        String uri = request.getRequestURI().substring(request.getContextPath().length()).substring(apiRoot.length());
+        HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
+        URLData urlData = getUrlDataFromRequest(uri, httpMethod);
+
+        return new FlexAction(request, response, urlData, filterConfig);
+    }
+
+    private URLData getUrlDataFromRequest(String url, HttpMethod httpMethod) {
         URLData urlData = null;
 
         //Get all route keys for this plugin
@@ -78,7 +100,6 @@ public class FlexUrlResolver {
         return urlData;
     }
 
-
     private Set<ActionData> getActionContext(String controllerPackageScan) {
         Set<ActionData> resourceContext = new HashSet<ActionData>();
 
@@ -101,6 +122,4 @@ public class FlexUrlResolver {
 
         return resourceContext;
     }
-
-
 }

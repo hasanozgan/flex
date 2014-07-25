@@ -24,38 +24,25 @@ import java.lang.reflect.Type;
 /**
  * Created by hasanozgan on 25/07/14.
  */
-public class FlexActionFactory {
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-    private ServletContext servletContext;
-    private String apiRoot;
-    private String authenticatorClass;
-    private Authenticator authenticator;
-    private Gson gson;
+public class FlexAction {
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
+    private final URLData urlData;
+    private final Authenticator authenticator;
+    private final ServletContext servletContext;
+    private final GsonBuilder builder;
 
-    public FlexActionFactory(HttpServletRequest request, HttpServletResponse response, FilterConfig filterConfig) {
+
+    public FlexAction(HttpServletRequest request, HttpServletResponse response, URLData urlData, FilterConfig filterConfig) {
         this.request = request;
         this.response = response;
-        this.apiRoot = filterConfig.getInitParameter("api-root");
-        this.authenticatorClass = filterConfig.getInitParameter("authenticator");
+        this.urlData = urlData;
+        this.authenticator = createAuthenticator(filterConfig, request);
         this.servletContext = filterConfig.getServletContext();
-
-        prepareAuthenticator();
-
-        GsonBuilder builder = new GsonBuilder().serializeNulls().disableHtmlEscaping().setPrettyPrinting();
-        gson = builder.create();
-
+        this.builder = new GsonBuilder().serializeNulls().disableHtmlEscaping().setPrettyPrinting();
     }
 
-    public String getRequestUri() {
-        return request.getRequestURI().substring(request.getContextPath().length()).substring(apiRoot.length());
-    }
-
-    public HttpMethod getRequestMethod() {
-        return HttpMethod.valueOf(request.getMethod());
-    }
-
-    public void invoke(URLData urlData) throws IOException {
+    public void invoke() throws IOException {
         Result result = null;
         if (null == urlData) {
             result = Results.error(FailureStatus.NOT_FOUND);
@@ -69,6 +56,8 @@ public class FlexActionFactory {
 
         renderResult(result);
     }
+
+
 
 
     private Result methodCall(URLData urlData) {
@@ -149,6 +138,7 @@ public class FlexActionFactory {
             Object entity = null;
             if (!jsonEntity.isEmpty()) {
                 try {
+                    Gson gson = builder.create();
                     entity = gson.fromJson(jsonEntity, parameterizedType.getActualTypeArguments()[0]);
                     return Results.ok(new HttpContextEntity(request, response, servletContext, authenticator, entity, urlData.getParameters()) {});
                 }
@@ -163,25 +153,14 @@ public class FlexActionFactory {
     }
 
 
-    private void prepareAuthenticator() {
-        try {
-            Class clazz = Class.forName(authenticatorClass);
-            this.authenticator = (Authenticator) clazz.newInstance();
-        } catch (Exception e) {
-            this.authenticator = new DefaultAuthenticator();
-        }
-
-        this.authenticator.init(request);
-    }
-
-
     private void renderResult(Result result) throws IOException {
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(result.getStatus().getHttpStatus());
-        Object data = result.isSuccess() ? result.getEntity() : result.getStatus();
 
+        Gson gson = builder.create();
+        Object data = result.isSuccess() ? result.getEntity() : result.getStatus();
         response.getWriter().write(addJSONP((data != null) ? gson.toJson(data) : "{}"));
     }
 
@@ -198,5 +177,20 @@ public class FlexActionFactory {
         }
 
         return json;
+    }
+
+    private Authenticator createAuthenticator(FilterConfig filterConfig, HttpServletRequest request) {
+        String authenticatorClass = filterConfig.getInitParameter("authenticator");
+        Authenticator authenticator = null;
+        try {
+            Class clazz = Class.forName(authenticatorClass);
+            authenticator = (Authenticator) clazz.newInstance();
+        } catch (Exception e) {
+            authenticator = new DefaultAuthenticator();
+        }
+
+        authenticator.init(request);
+
+        return authenticator;
     }
 }

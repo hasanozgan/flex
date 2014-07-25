@@ -13,20 +13,16 @@ import java.io.IOException;
  */
 public class FlexFilter implements Filter {
     private FlexUrlResolver flexUrlResolver;
-    private FilterConfig filterConfig;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        this.filterConfig = filterConfig;
-        this.flexUrlResolver = new FlexUrlResolver(filterConfig.getInitParameter("controller-scan"));
+        this.flexUrlResolver = new FlexUrlResolver(filterConfig);
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        FlexActionFactory flexActionFactory = new FlexActionFactory((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse, filterConfig);
-        URLData urlData = flexUrlResolver.getUrlDataForUrl(flexActionFactory.getRequestUri(), flexActionFactory.getRequestMethod());
-
-        flexActionFactory.invoke(urlData);
+        FlexAction flexAction = flexUrlResolver.actionFactory(servletRequest, servletResponse);
+        flexAction.invoke();
     }
 
     @Override

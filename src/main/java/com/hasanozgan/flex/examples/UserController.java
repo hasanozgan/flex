@@ -10,28 +10,28 @@ import com.hasanozgan.flex.core.models.response.Results;
 /**
  * Created by hasanozgan on 14/07/14.
  */
-public class UserResource {
+public class UserController {
 
     @Secured
     @Path(uri = "/user/info", method = HttpMethod.GET)
-    public static Result<User> getUserInfo() {
+    public Result<User> getUserInfo() {
         return Results.ok(new User(1, "hasan"));
     }
 
     @Secured
     @Path(uri = "/user/info", method = HttpMethod.POST)
-    public static Result<User> postUserInfo(HttpContext<User> ctx) {
+    public Result<User> postUserInfo(HttpContext<User> ctx) {
         return Results.ok(ctx.getEntity());
     }
 
     @Secured
     @Path(uri = "/user/coupons/{gameType}", method = HttpMethod.GET)
-    public static Result<String> getUserCoupons(HttpContext ctx) {
+    public Result<String> getUserCoupons(HttpContext ctx) {
         return Results.ok(ctx.getPathParameter("gameType"));
     }
 
     @Path(uri = "/user/details", method = HttpMethod.GET)
-    public static Result getUserDetails(HttpContext ctx) {
+    public Result getUserDetails(HttpContext ctx) {
         return Results.ok();
     }
 }
