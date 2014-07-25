@@ -2,7 +2,7 @@ package com.hasanozgan.flex.core.utils;
 
 import com.hasanozgan.flex.core.FlexAction;
 import com.hasanozgan.flex.core.HttpMethod;
-import com.hasanozgan.flex.core.annotations.Path;
+import com.hasanozgan.flex.core.annotations.Action;
 import com.hasanozgan.flex.core.annotations.Secured;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
@@ -109,14 +109,14 @@ public class FlexUrlResolver {
                 .addUrls(ClasspathHelper.forPackage(controllerPackageScan))
                 .setScanners(new MethodAnnotationsScanner()));
 
-        Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Path.class);
+        Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Action.class);
 
         for (Method method : methodSet) {
             Secured authenticated = (Secured)method.getAnnotation(Secured.class);
-            Path path = (Path)method.getAnnotation(Path.class);
+            Action action = (Action)method.getAnnotation(Action.class);
 
-            if (null != path) {
-                resourceContext.add(new ActionData(path.uri(), path.method(), authenticated != null, method));
+            if (null != action) {
+                resourceContext.add(new ActionData(action.uri(), action.method(), authenticated != null, method));
             }
         }
 
