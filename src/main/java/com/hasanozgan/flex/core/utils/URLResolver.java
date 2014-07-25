@@ -1,7 +1,14 @@
 package com.hasanozgan.flex.core.utils;
 
 import com.hasanozgan.flex.core.HttpMethod;
+import com.hasanozgan.flex.core.annotations.Path;
+import com.hasanozgan.flex.core.annotations.Secured;
+import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -11,8 +18,8 @@ public class URLResolver {
 
     private final Set<ResourceData> routes;
 
-    public URLResolver(Set<ResourceData> routes) {
-        this.routes = routes;
+    public URLResolver(String resourcePackageScan) {
+        this.routes = getResourceContext(resourcePackageScan);
     }
 
     public Set<ResourceData> getRoutes() {
@@ -69,6 +76,30 @@ public class URLResolver {
         }
 
         return urlData;
+    }
+
+
+    private Set<ResourceData> getResourceContext(String resourcePackageScan) {
+        Set<ResourceData> resourceContext = new HashSet<ResourceData>();
+
+        if (resourcePackageScan.isEmpty()) return resourceContext;
+
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .addUrls(ClasspathHelper.forPackage(resourcePackageScan))
+                .setScanners(new MethodAnnotationsScanner()));
+
+        Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Path.class);
+
+        for (Method method : methodSet) {
+            Secured authenticated = (Secured)method.getAnnotation(Secured.class);
+            Path path = (Path)method.getAnnotation(Path.class);
+
+            if (null != path) {
+                resourceContext.add(new ResourceData(path.uri(), path.method(), authenticated != null, method));
+            }
+        }
+
+        return resourceContext;
     }
 
 
