@@ -1,22 +1,21 @@
 package com.hasanozgan.flex.core.utils;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by hasan.ozgan on 7/15/2014.
  */
 public class URLData {
-    private final ResourceData resourceData;
+    private final ActionData actionData;
     private final String urlPattern;
     private final String realUrl;
     private final Map<String, String> parameters;
 
-    public URLData(String urlPattern, String realUrl, Map<String, String> parameters, ResourceData resourceData) {
+    public URLData(String urlPattern, String realUrl, Map<String, String> parameters, ActionData actionData) {
         this.urlPattern = urlPattern;
         this.realUrl = realUrl;
         this.parameters = parameters;
-        this.resourceData = resourceData;
+        this.actionData = actionData;
     }
 
     public String getUrlPattern() {
@@ -31,7 +30,7 @@ public class URLData {
         return parameters;
     }
 
-    public ResourceData getResourceData() {
-        return resourceData;
+    public ActionData getActionData() {
+        return actionData;
     }
 }

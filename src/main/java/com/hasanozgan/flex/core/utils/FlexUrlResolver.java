@@ -14,15 +14,15 @@ import java.util.*;
 /**
  * Created by hasan.ozgan on 7/15/2014.
  */
-public class URLResolver {
+public class FlexUrlResolver {
 
-    private final Set<ResourceData> routes;
+    private final Set<ActionData> routes;
 
-    public URLResolver(String resourcePackageScan) {
-        this.routes = getResourceContext(resourcePackageScan);
+    public FlexUrlResolver(String controllerPackageScan) {
+        this.routes = getActionContext(controllerPackageScan);
     }
 
-    public Set<ResourceData> getRoutes() {
+    public Set<ActionData> getRoutes() {
         return this.routes;
     }
 
@@ -30,9 +30,9 @@ public class URLResolver {
         URLData urlData = null;
 
         //Get all route keys for this plugin
-        for (ResourceData resourceData : getRoutes()) {
+        for (ActionData actionData : getRoutes()) {
             String urlToFind = url;
-            String urlPattern = resourceData.getPath();
+            String urlPattern = actionData.getPath();
             boolean urlMatch = false;
             Map<String, String> propertyMap = new HashMap<String, String>();
 
@@ -40,7 +40,7 @@ public class URLResolver {
                 urlToFind = url.substring(0, url.indexOf("?"));
             }
 
-            if (resourceData.getHttpMethod().equals(httpMethod)) {
+            if (actionData.getHttpMethod().equals(httpMethod)) {
                 if (urlPattern.equals(urlToFind)) {
                     //Excact match
                     urlMatch = true;
@@ -70,7 +70,7 @@ public class URLResolver {
 
             //If Url match, build up a URL data object
             if (urlMatch) {
-                urlData = new URLData(urlPattern, url, propertyMap, resourceData);
+                urlData = new URLData(urlPattern, url, propertyMap, actionData);
                 break;
             }
         }
@@ -79,13 +79,13 @@ public class URLResolver {
     }
 
 
-    private Set<ResourceData> getResourceContext(String resourcePackageScan) {
-        Set<ResourceData> resourceContext = new HashSet<ResourceData>();
+    private Set<ActionData> getActionContext(String controllerPackageScan) {
+        Set<ActionData> resourceContext = new HashSet<ActionData>();
 
-        if (resourcePackageScan.isEmpty()) return resourceContext;
+        if (controllerPackageScan.isEmpty()) return resourceContext;
 
         Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .addUrls(ClasspathHelper.forPackage(resourcePackageScan))
+                .addUrls(ClasspathHelper.forPackage(controllerPackageScan))
                 .setScanners(new MethodAnnotationsScanner()));
 
         Set<Method> methodSet = reflections.getMethodsAnnotatedWith(Path.class);
@@ -95,7 +95,7 @@ public class URLResolver {
             Path path = (Path)method.getAnnotation(Path.class);
 
             if (null != path) {
-                resourceContext.add(new ResourceData(path.uri(), path.method(), authenticated != null, method));
+                resourceContext.add(new ActionData(path.uri(), path.method(), authenticated != null, method));
             }
         }
 

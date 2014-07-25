@@ -60,7 +60,7 @@ public class FlexActionFactory {
         if (null == urlData) {
             result = Results.error(FailureStatus.NOT_FOUND);
         }
-        else if (urlData.getResourceData().authenticationRequired() && !authenticator.isAuthenticated()) {
+        else if (urlData.getActionData().authenticationRequired() && !authenticator.isAuthenticated()) {
             result = Results.error(FailureStatus.AUTHENTICATION_REQUIRED);
         }
         else {
@@ -72,7 +72,7 @@ public class FlexActionFactory {
 
 
     private Result methodCall(URLData urlData) {
-        if (urlData == null || urlData.getResourceData() == null || urlData.getResourceData().getActionMethod() == null) {
+        if (urlData == null || urlData.getActionData() == null || urlData.getActionData().getActionMethod() == null) {
             return Results.error(FailureStatus.INVALID_URL_DATA_CONFIGURATION);
         }
 
@@ -84,10 +84,10 @@ public class FlexActionFactory {
         }
         Object methodArgs = result.getEntity();
         try {
-            Object clazz = urlData.getResourceData().getActionMethod().getDeclaringClass().newInstance();
+            Object clazz = urlData.getActionData().getActionMethod().getDeclaringClass().newInstance();
             result = (Result) ((methodArgs == null)
-                    ? urlData.getResourceData().getActionMethod().invoke(clazz)
-                    : urlData.getResourceData().getActionMethod().invoke(clazz, methodArgs));
+                    ? urlData.getActionData().getActionMethod().invoke(clazz)
+                    : urlData.getActionData().getActionMethod().invoke(clazz, methodArgs));
         } catch (Exception e) {
             result = Results.error(FailureStatus.INVOKER_ERROR);
         }
@@ -131,7 +131,7 @@ public class FlexActionFactory {
     }
 
     private Result createActionMethodParameter(URLData urlData) {
-        Type[] types = urlData.getResourceData().getActionMethod().getGenericParameterTypes();
+        Type[] types = urlData.getActionData().getActionMethod().getGenericParameterTypes();
 
         if (types.length == 0) return Results.ok();
 

@@ -7,13 +7,13 @@ import java.lang.reflect.Method;
 /**
  * Created by hasan.ozgan on 7/15/2014.
  */
-public class ResourceData {
+public class ActionData {
     private final Method actionMethod;
     private final String path;
     private final HttpMethod httpMethod;
     private final boolean authenticationRequired;
 
-    public ResourceData(String path, HttpMethod httpMethod, boolean authenticationRequired, Method actionMethod) {
+    public ActionData(String path, HttpMethod httpMethod, boolean authenticationRequired, Method actionMethod) {
         this.path = path;
         this.httpMethod = httpMethod;
         this.authenticationRequired = authenticationRequired;
@@ -39,9 +39,9 @@ public class ResourceData {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ResourceData)) return false;
+        if (!(o instanceof ActionData)) return false;
 
-        ResourceData that = (ResourceData) o;
+        ActionData that = (ActionData) o;
 
         if (httpMethod != that.httpMethod) return false;
         if (path != null ? !path.equals(that.path) : that.path != null) return false;

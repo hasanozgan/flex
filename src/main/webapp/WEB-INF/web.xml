@@ -9,7 +9,7 @@
         <filter-name>FlexFilter</filter-name>
         <filter-class>com.hasanozgan.flex.core.FlexFilter</filter-class>
         <init-param>
-            <param-name>action-scan</param-name>
+            <param-name>controller-scan</param-name>
             <param-value>com.hasanozgan.flex.examples</param-value>
         </init-param>
         <init-param>
