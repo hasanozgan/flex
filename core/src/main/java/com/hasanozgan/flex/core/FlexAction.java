@@ -43,6 +43,7 @@ public class FlexAction {
     }
 
     public void invoke() throws IOException {
+
         Result result = null;
         if (null == urlData) {
             result = Results.error(FailureStatus.NOT_FOUND);
@@ -151,7 +152,6 @@ public class FlexAction {
             return Results.error(FailureStatus.INVALID_ACTION_METHOD_PARAMETERS);
         }
     }
-
 
     private void renderResult(Result result) throws IOException {
 

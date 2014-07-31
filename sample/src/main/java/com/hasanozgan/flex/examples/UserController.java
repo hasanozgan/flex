@@ -32,6 +32,15 @@ public class UserController {
 
     @Action(uri = "/user/details", method = HttpMethod.GET)
     public Result getUserDetails(HttpContext ctx) {
-        return Results.ok();
+        Object obj = new Object();
+        synchronized (obj){
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return Results.ok();
+        }
+
     }
 }

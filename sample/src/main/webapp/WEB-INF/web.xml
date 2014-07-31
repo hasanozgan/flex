@@ -1,0 +1,30 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Example Web Application</display-name>
+
+    <filter>
+        <filter-name>FlexFilter</filter-name>
+        <filter-class>com.hasanozgan.flex.core.FlexFilter</filter-class>
+        <init-param>
+            <param-name>controller-scan</param-name>
+            <param-value>com.hasanozgan.flex.examples</param-value>
+        </init-param>
+        <init-param>
+            <param-name>api-root</param-name>
+            <param-value>/api</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>authenticator</param-name>
+            <param-value>com.hasanozgan.flex.examples.MyAuthenticator</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>FlexFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+</web-app>
