@@ -1,7 +1,5 @@
 package com.hasanozgan.flex.core;
 
-import com.hasanozgan.flex.examples.User;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
