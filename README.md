@@ -5,6 +5,14 @@ flex for your legacy servlet project.
 
 #### Easy Install
 ```xml
+  <dependency>
+    <groupId>com.hasanozgan.flex</groupId>
+    <artifactId>flex-core</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+  </dependency>
+``` 
+
+```xml
 <web-app>
   <filter>
     <filter-name>FlexFilter</filter-name>
