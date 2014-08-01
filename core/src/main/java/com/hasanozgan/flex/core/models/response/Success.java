@@ -37,8 +37,4 @@ public class Success<T> implements Result<T> {
     public Status getStatus() {
         return SuccessStatus.SUCCESS;
     }
-
-    public static <T> Result<T> withType() {
-        return (Result<T>) new Failure<Object>(SuccessStatus.SUCCESS, new Object());
-    }
 }

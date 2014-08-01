@@ -4,6 +4,7 @@ import com.hasanozgan.flex.core.annotations.Secured;
 import com.hasanozgan.flex.core.HttpMethod;
 import com.hasanozgan.flex.core.annotations.Action;
 import com.hasanozgan.flex.core.models.request.HttpContext;
+import com.hasanozgan.flex.core.models.response.FailureStatus;
 import com.hasanozgan.flex.core.models.response.Result;
 import com.hasanozgan.flex.core.models.response.Results;
 
@@ -37,7 +38,7 @@ public class UserController {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Results.error(FailureStatus.UNKNOWN_ERROR);
             }
             return Results.ok();
         }

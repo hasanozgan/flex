@@ -8,7 +8,7 @@ package com.hasanozgan.flex.core.models.response;
  * To change this template use File | Settings | File Templates.
  */
 public class SuccessStatus extends Status {
-    public final static Status SUCCESS = new SuccessStatus(1000, "Success");
+    public final static Status SUCCESS = new SuccessStatus(0, "Success");
 
     public SuccessStatus(Integer code, String description) {
         super(code, description, 200);

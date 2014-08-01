@@ -5,7 +5,7 @@ package com.hasanozgan.flex.core.models.response;
  */
 public class Results {
     public static <T> Result<T> ok() {
-        return new Success();
+        return new Success<T>();
     }
 
     public static <T> Result<T> ok(T entity) {

@@ -7,7 +7,7 @@ package com.hasanozgan.flex.core.models.response;
  * Time: 2:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Failure<T> implements Result<T> {
+class Failure<T> implements Result<T> {
     private final Status status;
     private final T entity;
 
@@ -41,6 +41,6 @@ public class Failure<T> implements Result<T> {
     }
 
     public static <T> Result<T> withType(Status status) {
-        return (Result<T>) new Failure<Object>(status);
+        return new Failure<T>(status);
     }
 }

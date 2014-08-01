@@ -5,7 +5,7 @@
   <artifactId>flex-sample</artifactId>
   <packaging>war</packaging>
   <version>0.3.0</version>
-  <name>Flex Maven Webapp</name>
+  <name>Flex Sample</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>

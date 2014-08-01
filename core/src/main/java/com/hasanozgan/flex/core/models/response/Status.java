@@ -3,9 +3,6 @@ package com.hasanozgan.flex.core.models.response;
 /**
  * Created with IntelliJ IDEA.
  * User: hasan.ozgan
- * Date: 7/1/14
- * Time: 1:54 PM
- * To change this template use File | Settings | File Templates.
  */
 public abstract class Status {
     private final Integer code;
