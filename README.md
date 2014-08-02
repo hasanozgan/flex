@@ -1,6 +1,6 @@
-## Flex Micro Rest Framework
+## Flex Micro Framework for REST App
 
-flex for your legacy servlet project.
+Flex for your legacy servlet project.
 
 
 #### Easy Install
